@@ -54,6 +54,7 @@ document.getElementById('homeBtn').onclick=()=>{if(HOME&&HOME.lat){setMarker(HOM
 document.getElementById('locateBtn').onclick=()=>{title.textContent='Locating...';info.textContent='Using Android GPS.';if(window.AndroidLocation){AndroidLocation.requestLocation()}else{window.nativeLocationError()}};
 map.on('click',e=>setMarker(e.latlng.lat,e.latlng.lng,'Dropped pin','Custom map point'));
 </script>
+<script src="account-lite.js"></script>
 <script src="nav.js"></script>
 </body>
 </html>
