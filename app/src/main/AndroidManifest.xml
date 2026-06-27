@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
-        android:label="b-map"
+        android:label="B-Map version 2 OS flow 96"
         android:icon="@drawable/ic_launcher"
         android:theme="@style/AppTheme">
         <activity
