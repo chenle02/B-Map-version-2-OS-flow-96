@@ -10,7 +10,7 @@
 </style>
 </head>
 <body>
-<div id="login"><div class="login-card"><h2>🌍 b-map</h2><p>Sign in to keep Home and search history. Google sign-in needs your real OAuth Client ID later.</p><button id="guestBtn">Continue as Guest</button><button class="gray" id="googleBtn">Sign in with Google</button></div></div>
+<div id="login"><div class="login-card"><h2>🌍 b-map</h2><p>Continue as Guest to keep Home and search history on this phone.</p><button id="guestBtn">Continue as Guest</button></div></div>
 <div class="app">
 <header class="topbar">
   <div class="brand"><div class="logo">🌍</div><div><h1>b-map</h1><div class="sub">dark blue global map</div></div></div>
@@ -28,7 +28,6 @@
 const login=document.getElementById('login');
 if(localStorage.getItem('bmap_signed_in')==='yes')login.style.display='none';
 document.getElementById('guestBtn').onclick=()=>{localStorage.setItem('bmap_signed_in','yes');localStorage.setItem('bmap_user','Guest');login.style.display='none'};
-document.getElementById('googleBtn').onclick=()=>{localStorage.setItem('bmap_signed_in','yes');localStorage.setItem('bmap_user','Google demo');login.style.display='none';alert('Demo only. Add a real Google OAuth Client ID to enable real Google login.')};
 const map=L.map('map',{zoomControl:true}).setView([20,0],2);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
 const title=document.getElementById('placeTitle'),info=document.getElementById('placeInfo'),box=document.getElementById('searchBox');let marker=null;let meMarker=null;let lastPlaceName='Dropped pin',lastPlaceDesc='Custom map point';
