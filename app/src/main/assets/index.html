@@ -19,25 +19,27 @@
   <div id="map"></div>
   <button class="fab locate" id="locateBtn">⌖</button>
   <button class="fab home" id="homeBtn">⌂</button>
-  <div class="panel"><b id="placeTitle">Ready</b><small id="placeInfo">Drag, zoom, search, tap to drop a pin, or use location.</small></div>
+  <div class="panel"><b id="placeTitle">Ready</b><small id="placeInfo">Auto-typo fix is on. Try home, 538 greenwood, or any place.</small></div>
 </main>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const map=L.map('map',{zoomControl:true}).setView([20,0],2);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
-const title=document.getElementById('placeTitle'),info=document.getElementById('placeInfo');let marker=null;let meMarker=null;
+const title=document.getElementById('placeTitle'),info=document.getElementById('placeInfo'),box=document.getElementById('searchBox');let marker=null;let meMarker=null;
 const pinIcon=L.divIcon({className:'',html:'<div class="pin">📍</div>',iconSize:[32,32],iconAnchor:[16,30]});
 const meIcon=L.divIcon({className:'',html:'<div class="me"></div>',iconSize:[30,30],iconAnchor:[15,15]});
-const saved=[['Atlanta',33.749,-84.388],['Beijing',39.904,116.407],['London',51.507,-.128],['Paris',48.856,2.352],['Tokyo',35.676,139.65],['Sydney',-33.868,151.209],['Auburn',32.609,-85.48]];
+const HOME={name:'Home',addr:'538 Greenwood Ave NE, Atlanta, GA 30308',lat:33.77615,lon:-84.36795};
+const saved=[['Atlanta',33.749,-84.388],['Beijing',39.904,116.407],['London',51.507,-.128],['Paris',48.856,2.352],['Tokyo',35.676,139.65],['Sydney',-33.868,151.209],['Auburn',32.609,-85.48],[HOME.name,HOME.lat,HOME.lon]];
 saved.forEach(p=>L.marker([p[1],p[2]],{icon:pinIcon}).addTo(map).bindPopup('<b>'+p[0]+'</b>'));
-function setMarker(lat,lon,name,desc){if(marker)map.removeLayer(marker);marker=L.marker([lat,lon],{icon:pinIcon}).addTo(map).bindPopup('<b>'+name+'</b><br>'+desc).openPopup();title.textContent=name;info.textContent=desc+' · '+lat.toFixed(5)+', '+lon.toFixed(5);map.setView([lat,lon],14)}
+function setMarker(lat,lon,name,desc){if(marker)map.removeLayer(marker);marker=L.marker([lat,lon],{icon:pinIcon}).addTo(map).bindPopup('<b>'+name+'</b><br>'+desc).openPopup();title.textContent=name;info.textContent=desc+' · '+lat.toFixed(5)+', '+lon.toFixed(5);map.setView([lat,lon],17)}
 function setMe(lat,lon,acc){if(meMarker)map.removeLayer(meMarker);meMarker=L.marker([lat,lon],{icon:meIcon}).addTo(map).bindPopup('<b>You are here</b><br>Accuracy '+Math.round(acc||0)+' m').openPopup();title.textContent='You are here';info.textContent='Android GPS · '+lat.toFixed(5)+', '+lon.toFixed(5);map.setView([lat,lon],16)}
 window.nativeLocationResult=function(lat,lon,acc){setMe(lat,lon,acc)};
 window.nativeLocationError=function(){title.textContent='Location unavailable';info.textContent='Turn on GPS/location services, then try again.'};
-async function searchPlace(q){title.textContent='Searching...';info.textContent=q;try{const url='https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q);const r=await fetch(url,{headers:{Accept:'application/json'}});const data=await r.json();if(!data.length){title.textContent='Not found';info.textContent='Try another search.';return}const p=data[0];setMarker(parseFloat(p.lat),parseFloat(p.lon),p.display_name.split(',')[0],p.display_name)}catch(e){title.textContent='Search failed';info.textContent='Check internet connection.'}}
-document.getElementById('searchForm').onsubmit=e=>{e.preventDefault();const q=document.getElementById('searchBox').value.trim();if(q)searchPlace(q)};
-document.getElementById('homeBtn').onclick=()=>{map.setView([20,0],2);title.textContent='World view';info.textContent='Dark blue OpenStreetMap global map'};
+function fixQuery(q){let s=q.toLowerCase().trim();s=s.replace(/\bme\b/g,'ne').replace(/\bav\b/g,'ave').replace(/\bavenue\b/g,'ave').replace(/\bgeorga\b/g,'georgia').replace(/\bgeo\b/g,'georgia').replace(/\batl\b/g,'atlanta').replace(/greenwo+d/g,'greenwood').replace(/\s+/g,' ');if(s==='home'||(s.includes('538')&&s.includes('greenwood')))return HOME.addr;return s;}
+async function searchPlace(raw){const q=fixQuery(raw);box.value=q;title.textContent='Searching...';info.textContent=q;if(q===HOME.addr){setMarker(HOME.lat,HOME.lon,HOME.name,HOME.addr);return}try{const url='https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q);const r=await fetch(url,{headers:{Accept:'application/json'}});const data=await r.json();if(!data.length){title.textContent='Not found';info.textContent='Auto-fixed search still found nothing. Try street, city, state.';return}const p=data[0];setMarker(parseFloat(p.lat),parseFloat(p.lon),p.display_name.split(',')[0],p.display_name)}catch(e){title.textContent='Search failed';info.textContent='Check internet connection.'}}
+document.getElementById('searchForm').onsubmit=e=>{e.preventDefault();const q=box.value.trim();if(q)searchPlace(q)};
+document.getElementById('homeBtn').onclick=()=>{setMarker(HOME.lat,HOME.lon,HOME.name,HOME.addr)};
 document.getElementById('locateBtn').onclick=()=>{title.textContent='Locating...';info.textContent='Using Android GPS.';if(window.AndroidLocation){AndroidLocation.requestLocation()}else{window.nativeLocationError()}};
 map.on('click',e=>setMarker(e.latlng.lat,e.latlng.lng,'Dropped pin','Custom map point'));
 </script>
