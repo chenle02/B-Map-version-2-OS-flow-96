@@ -10,10 +10,10 @@
 </style>
 </head>
 <body>
-<div id="login"><div class="login-card"><h2>🌍 b-map</h2><p>Continue as Guest to keep Home and search history on this phone.</p><button id="guestBtn">Continue as Guest</button></div></div>
+<div id="login"><div class="login-card"><h2>🧭 b-map</h2><p>Continue as Guest to keep Home and search history on this phone.</p><button id="guestBtn">Continue as Guest</button></div></div>
 <div class="app">
 <header class="topbar">
-  <div class="brand"><div class="logo">🌍</div><div><h1>b-map</h1><div class="sub">dark blue global map</div></div></div>
+  <div class="brand"><div class="logo">🧭</div><div><h1>b-map</h1><div class="sub">dark blue global map</div></div></div>
   <form class="search" id="searchForm"><input id="searchBox" placeholder="Search places, cities, streets..."><button class="go">Go</button></form>
 </header>
 <main class="map-shell">
@@ -39,7 +39,7 @@ const saved=[['Atlanta',33.749,-84.388],['Beijing',39.904,116.407],['London',51.
 if(HOME&&HOME.lat)saved.push(['Home',HOME.lat,HOME.lon]);
 saved.forEach(p=>L.marker([p[1],p[2]],{icon:pinIcon}).addTo(map).bindPopup('<b>'+p[0]+'</b>'));
 function setMarker(lat,lon,name,desc){lastPlaceName=name;lastPlaceDesc=desc;if(marker)map.removeLayer(marker);marker=L.marker([lat,lon],{icon:pinIcon}).addTo(map).bindPopup('<b>'+name+'</b><br>'+desc).openPopup();title.textContent=name;info.textContent=desc+' · '+lat.toFixed(5)+', '+lon.toFixed(5);map.setView([lat,lon],17)}
-function setMe(lat,lon,acc){if(meMarker)map.removeLayer(meMarker);meMarker=L.marker([lat,lon],{icon:meIcon}).addTo(map).bindPopup('<b>You are here</b><br>Accuracy '+Math.round(acc||0)+' m').openPopup();title.textContent='You are here';info.textContent='Android GPS · '+lat.toFixed(5)+', '+lon.toFixed(5);map.setView([lat,lon],16)}
+function setMe(lat,lon,acc){if(meMarker)map.removeLayer(meMarker);meMarker=L.marker([lat,lon],{icon:meIcon}).addTo(map).bindPopup('<b>You are here</b><br>Accuracy '+Math.round(acc||0)+' m').openPopup();title.textContent='You are here';info.textContent='GPS · '+lat.toFixed(5)+', '+lon.toFixed(5);map.setView([lat,lon],16)}
 window.nativeLocationResult=function(lat,lon,acc){setMe(lat,lon,acc)};
 window.nativeLocationError=function(){title.textContent='Location unavailable';info.textContent='Turn on GPS/location services, then try again.'};
 function fixQuery(q){let s=q.toLowerCase().trim();s=s.replace(/\bme\b/g,'ne').replace(/\bav\b/g,'ave').replace(/\bavenue\b/g,'ave').replace(/\bgeorga\b/g,'georgia').replace(/\bgeo\b/g,'georgia').replace(/\batl\b/g,'atlanta').replace(/greenwo+d/g,'greenwood').replace(/\s+/g,' ');return s;}
@@ -51,7 +51,7 @@ function logout(){localStorage.removeItem('bmap_signed_in');localStorage.removeI
 const panel=document.querySelector('.panel');const setHomeBtn=document.createElement('button');setHomeBtn.textContent='Set Home';setHomeBtn.className='mini-btn gray';panel.appendChild(setHomeBtn);setHomeBtn.onclick=setHomeManual;const logoutBtn=document.createElement('button');logoutBtn.textContent='Logout';logoutBtn.className='mini-btn gray';panel.appendChild(logoutBtn);logoutBtn.onclick=logout;renderHistory();
 document.getElementById('searchForm').onsubmit=e=>{e.preventDefault();const q=box.value.trim();if(q)searchPlace(q)};
 document.getElementById('homeBtn').onclick=()=>{if(HOME&&HOME.lat){setMarker(HOME.lat,HOME.lon,'Home',HOME.addr||'Manual home')}else{title.textContent='Home not set';info.textContent='Search/tap a place first, then tap Set Home.'}};
-document.getElementById('locateBtn').onclick=()=>{title.textContent='Locating...';info.textContent='Using Android GPS.';if(window.AndroidLocation){AndroidLocation.requestLocation()}else{window.nativeLocationError()}};
+document.getElementById('locateBtn').onclick=()=>{title.textContent='Locating...';info.textContent='Using GPS.';if(window.AndroidLocation){AndroidLocation.requestLocation()}else if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>setMe(p.coords.latitude,p.coords.longitude,p.coords.accuracy),()=>window.nativeLocationError(),{enableHighAccuracy:true,timeout:10000})}else{window.nativeLocationError()}};
 map.on('click',e=>setMarker(e.latlng.lat,e.latlng.lng,'Dropped pin','Custom map point'));
 </script>
 <script src="account-lite.js"></script>
